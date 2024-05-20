@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaskapp  # Replace with your application name
+  namespace: flaskapps  # Replace with the namespace you created
+  annotations:
+    metallb.universe.tf/address-pool: default
+spec:
+  replicas: 1  # The number of application pod replicas
+  selector:
+    matchLabels:
+      app: flaskapp
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      containers:
+      - name: flaskapp
+        image: testdemoazure/flaskapp:1.1  # Replace with your image URL
+        ports:
+          - containerPort: 5000
+---
+# This defines a LoadBalancer service for your application
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp-service  # Replace with a descriptive name
+  namespace: flaskapps  # Replace with the namespace you created
+spec:
+  type: LoadBalancer  # Set the service type to LoadBalancer
+  selector:
+    app: flaskapp  # Matches pods with the label 'app: flaskapp'
+  ports:
+    - protocol: TCP  # Default protocol
+      port: 80  # Exposed port on the load balancer
+      targetPort: 5000  # Targets the same port within the container
